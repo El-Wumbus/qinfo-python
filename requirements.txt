@@ -1,3 +1,3 @@
 wheel
 twine
-auditwheelgac
+auditwheel
