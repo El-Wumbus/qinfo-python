@@ -1,0 +1,5 @@
+build
+.vscode
+dist
+wheelhouse
+*.egg-info
