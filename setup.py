@@ -25,9 +25,9 @@ setup(name="qinfo-python",
       description="Allows for using qinfo functions",
       long_description_content_type="text/markdown",
       long_description=LONG_DESCRIPTION,
-      version="0.0.4",
+      version="0.0.5",
       ext_modules=[module],
-      license='GPLv3',
+      license='LGPLv3',
       classifiers=[
           "Operating System :: Unix"]
       )
