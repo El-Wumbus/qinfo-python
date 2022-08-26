@@ -1,0 +1,3 @@
+[submodule "qinfo"]
+	path = qinfo
+	url = git@github.com:El-Wumbus/qinfo.git
