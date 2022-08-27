@@ -22,12 +22,13 @@ setup(name="qinfo-python",
       author="Decator",
       author_email="decator.c@proton.me",
       url="https://github.com/el-wumbus/qinfo-python",
-      description="Allows for using qinfo functions",
+      description="Python3 bindings for qinfo",
       long_description_content_type="text/markdown",
       long_description=LONG_DESCRIPTION,
-      version="0.0.5",
+      version="0.0.6",
       ext_modules=[module],
       license='LGPLv3',
       classifiers=[
-          "Operating System :: Unix"]
+          "Operating System :: Unix"
+          ]
       )
