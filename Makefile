@@ -9,3 +9,7 @@ upload: package
 
 clean:
 	rm -rf dist build *.egg-info wheelhouse
+
+submodlue-latest:
+	git submodule sync qinfo
+	git submodule update --remote --merge

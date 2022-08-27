@@ -4,6 +4,15 @@
 
 typedef PyObject pyob;
 
+struct packages
+{
+  packagecount pacman_packages;
+  packagecount apt_packages;
+  packagecount apk_packages;
+  packagecount flatpak_packages;
+  packagecount snap_packages;
+};
+
 static pyob *qinfo_get_core_count(pyob *self)
 {
   int sts;
@@ -22,6 +31,7 @@ static pyob *qinfo_get_thread_count(pyob *self)
   sts = get_thread_count();
   return Py_BuildValue("i", sts);
 }
+
 static pyob *qinfo_get_total_memory(pyob *self)
 {
   int sts;
@@ -54,10 +64,14 @@ static pyob *qinfo_get_cpu_model(pyob *self)
 
 static pyob *qinfo_operating_system_name(pyob *self)
 {
-  char *sts;
-  sts = get_operating_system_name();
-  pyob *retval = Py_BuildValue("s", sts);
-  free(sts);
+  char *os_name;
+  if ((os_name = get_operating_system_name_bedrock()) == NULL)
+  {
+    os_name = get_operating_system_name();
+  }
+
+  pyob *retval = Py_BuildValue("s", os_name);
+  free(os_name);
   return retval;
 }
 
@@ -78,6 +92,16 @@ static pyob *qinfo_kuname(pyob *self)
   free(sts);
   return retval;
 }
+
+static pyob *qinfo_hostname(pyob *self)
+{
+  char *sts;
+  sts = get_hostname();
+  pyob *retval = Py_BuildValue("s", sts);
+  free(sts);
+  return retval;
+}
+
 
 static pyob *qinfo_parse_config(pyob *self, pyob *args)
 {
@@ -124,12 +148,129 @@ static pyob *qinfo_parse_config(pyob *self, pyob *args)
   PyDict_SetItemString(dict, "display_logo", display_logo);
   PyDict_SetItemString(dict, "display_rootfs_birth", display_rootfs);
   PyDict_SetItemString(dict, "display_pkg_count", display_pkg);
-  PyDict_SetItemString(dict, "display_shell", display_cpu);
+  PyDict_SetItemString(dict, "display_shell", display_shell);
+  PyDict_SetItemString(dict, "display_username", display_username);
+  PyDict_SetItemString(dict, "display_os", display_os);
+  PyDict_SetItemString(dict, "date_order", display_dates);
   PyDict_SetItemString(dict, "idcolor", display_idcol);
-  PyDict_SetItemString(dict, "txtcolor", display_txtcol );
+  PyDict_SetItemString(dict, "txtcolor", display_txtcol);
   PyDict_SetItemString(dict, "logocolor", display_logocol);
+
+  return dict;
+}
+
+static pyob *qinfo_get_rootfs_fsage(pyob *self)
+{
+  struct date rootfsage = get_creation_date();
+
+  pyob *year = Py_BuildValue("i", rootfsage.year);
+  pyob *month = Py_BuildValue("i", rootfsage.month);
+  pyob *day = Py_BuildValue("i", rootfsage.day);
+  pyob *dict = PyDict_New();
+  PyDict_SetItemString(dict, "year", year);
+  PyDict_SetItemString(dict, "month", month);
+  PyDict_SetItemString(dict, "day", day);
+
+  return dict;
+}
+
+static struct packages formatted_packages(packagecount pacman_packages,
+                                          packagecount apt_packages,
+                                          packagecount apk_packages,
+                                          packagecount flatpak_packages,
+                                          packagecount snap_packages)
+{
+  struct packages pkgs;
+  if (pacman_packages > 0)
+  {
+    pkgs.pacman_packages = pacman_packages;
+  }
+  else
+  {
+    pkgs.pacman_packages = 0;
+  }
+  if (apt_packages > 0)
+  {
+    pkgs.apt_packages = apt_packages;
+  }
+  else
+  {
+    pkgs.apt_packages = 0;
+  }
+  if (apk_packages > 0)
+  {
+    pkgs.apk_packages = apk_packages;
+  }
+  else
+  {
+    pkgs.apk_packages = 0;
+  }
+  if (flatpak_packages > 0)
+  {
+    pkgs.flatpak_packages = flatpak_packages;
+  }
+  else
+  {
+    pkgs.flatpak_packages = 0;
+  }
+  if (snap_packages > 0)
+  {
+    pkgs.snap_packages = snap_packages;
+  }
+  else
+  {
+    pkgs.snap_packages = 0;
+  }
+  return pkgs;
+}
+
+static pyob *qinfo_get_packages(pyob *self)
+{
+  struct packages pkgs;
+  packagecount pacman_packages = 0;
+  packagecount apt_packages = 0;
+  packagecount apk_packages = 0;
+  packagecount flatpak_packages = 0;
+  packagecount snap_packages = 0;
+  flatpak_packages = get_num_packages(FLATPAK_PACKAGE_MANAGER);
+  snap_packages = get_num_packages(SNAP_PACKAGE_MANAGER);
+  pacman_packages = get_num_packages(PACMAN_PACKAGE_MANAGER);
+  apt_packages = get_num_packages(APT_PACKAGE_MANAGER);
+  apk_packages = get_num_packages(APK_PACKAGE_MANAGER);
+  pkgs = formatted_packages(pacman_packages, apt_packages, apk_packages,
+                            flatpak_packages, snap_packages);
+
+  pyob *py_pacman_packages = Py_BuildValue("i", pkgs.pacman_packages);
+  pyob *py_apt_packages = Py_BuildValue("i", pkgs.apt_packages);
+  pyob *py_apk_packages = Py_BuildValue("i", pkgs.apk_packages);
+  pyob *py_flatpak_packages = Py_BuildValue("i", pkgs.flatpak_packages);
+  pyob *py_snap_packages = Py_BuildValue("i", pkgs.snap_packages);
+
+  pyob *dict = PyDict_New();
+  PyDict_SetItemString(dict, "pacman", py_pacman_packages);
+  PyDict_SetItemString(dict, "apt", py_apt_packages);
+  PyDict_SetItemString(dict, "apk", py_apk_packages);
+  PyDict_SetItemString(dict, "flatpak", py_flatpak_packages);
+  PyDict_SetItemString(dict, "snap", py_snap_packages);
   
   return dict;
+}
+
+static pyob *qinfo_username(pyob *self)
+{
+  char *sts;
+  sts = get_username();
+  pyob *retval = Py_BuildValue("s", sts);
+  return retval;
+}
+
+static pyob *qinfo_shell(pyob *self)
+{
+  char *sts;
+  sts = get_shell_name();
+  pyob *retval = Py_BuildValue("s", sts);
+  free(sts);
+  return retval;
 }
 
 static PyMethodDef qinfof[] = {
@@ -144,8 +285,13 @@ static PyMethodDef qinfof[] = {
     {"motherboard_model", qinfo_get_board_model, METH_NOARGS, "Returns the model name of the motherboard along with the manufacturer."},
     {"kernel_release", qinfo_kuname, METH_NOARGS, "Returns the release name of the kernel."},
     {"parse_config", qinfo_parse_config, METH_VARARGS, "Returns a dict of all the configuration options."},
+    {"rootfs_age", qinfo_get_rootfs_fsage, METH_NOARGS, "Returns a dict of the age of the root file system."},
+    {"username", qinfo_username, METH_NOARGS, "Returns the username of the user running the program as a string."},
+    {"packages", qinfo_get_packages, METH_NOARGS, "Returns a dict of the number of packages for each supported package manager."},
+    {"shell", qinfo_shell, METH_NOARGS, "Returns a string containing the shell (or if none found, the calling process)."},
+    {"hostname", qinfo_hostname, METH_NOARGS, "Return the hostname of the system as a string."},
     {NULL, NULL, 0, NULL}
-};
+    };
 
 static struct PyModuleDef qinfo = {
     PyModuleDef_HEAD_INIT,

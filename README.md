@@ -67,7 +67,7 @@ sexit(main())
   * Returns the cpu model as a string.
 
 * `kernel_release()` -> string
-  * Returns the release name of the kernel.
+  * Returns the release and name of the kernel.
 
 * `motherboard_model()` -> string
   * Returns the model name of the motherboard along with the manufacturer.
@@ -90,30 +90,71 @@ sexit(main())
 * `version()` -> string
   * Returns the version of qinfo being used.
 
-#### What the config dict looks like
+* `hostname()` -> string
+  * Return the hostname of the system as a string.
 
-`parse_config` returns a dict of the configuration options and their values.
+* `packages()` -> dict
+  * Returns a dict of the number of packages for each supported package manager.
+
+* `rootfs_age()` -> dict
+  * Returns a dict of the age of the root file system.
+
+* `shell()` -> string
+  * Returns a string containing the shell (or if none found, the calling process).
+
+* `username()` -> string
+  * Returns the username of the user running the program as a string.
+
+#### What the dictionaries look like
+
+`parse_config()` returns a dict of the configuration options and their values.
 This looks similar to the following:
 
 ```Python
 {
- 'display_cpu': 1,          # Display cpu name and core/thread info
- 'display_etc_cpu': 0,      # Display extra cpu info
- 'display_mem': 1,          # Display memory capacity and usage ratio
- 'display_board': 1,        # Display motherboard info
- 'display_hostname': 1,     #  Display the computer's hostname
- 'display_uptime': 1,       # Display the system uptime
- 'display_gb': 1,           # Measure memory in gigabytes instead of kilobytes
- 'display_kernel': 1,       # Display Kernel release version
- 'display_logo': 1,         # Display a logo for the OS if supported
- 'display_rootfs_birth': 1, # Display the birthdate of the root file system
- 'display_pkg_count': 1,    # Display the number of packages for every supported package manager
- 'display_shell': 1,        # Display the shell calling the program
- 'idcolor': '\x1b[1;36m',   # Color for the id column
- 'txtcolor': '',            # Color for the text column
- 'logocolor': '\x1b[0;31m'  # Color for the logo
+  'display_cpu': 1,          # Display cpu name and core/thread info
+  'display_etc_cpu': 0,      # Display extra cpu info
+  'display_mem': 1,          # Display memory capacity and usage ratio
+  'display_board': 1,        # Display motherboard info
+  'display_hostname': 1,     # Display the computer's hostname
+  'display_uptime': 1,       # Display the system uptime
+  'display_gb': 1,           # Measure memory in gigabytes instead of kilobytes
+  'display_kernel': 1,       # Display Kernel release version
+  'display_logo': 1,         # Display a logo for the OS if supported
+  'display_rootfs_birth': 1, # Display the birthdate of the root file system
+  'display_pkg_count': 1,    # Display the number of packages for every supported package manager
+  'display_shell': 1,        # Display the shell calling the program
+  'display_username': 1,     # Display the username of the user calling the program
+  'display_os': 1,           # Display the os name
+  'date_order' : 0,          # supported formats are YYYY/MM/DD (0) and MM/DD/YYYY (1)
+  'idcolor': '\x1b[1;36m',   # Color for the id column
+  'txtcolor': '',            # Color for the text column
+  'logocolor': '\x1b[0;31m'  # Color for the logo
 }
 ```
 
 The *color values are ansi escape codes.
 The rest are int values that are either `1` or `0` (a.k.a booleans).
+
+`rootfs_age()` returns a dict containing the date.
+This will look like the following:
+
+```Python
+{
+  'year': 2022,
+  'month': 8,
+  'day': 21
+}
+```
+
+`packages()` returns a dict that looks something like the following:
+
+```Python
+{
+  'pacman': 979,
+  'apt': 372,
+  'apk': 87,
+  'flatpak': 0,
+  'snap': 0
+}
+```
