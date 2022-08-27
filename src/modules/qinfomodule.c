@@ -38,7 +38,7 @@ static pyob *qinfo_get_avalible_memory(pyob *self)
 
 static pyob *qinfo_get_uptime(pyob *self)
 {
-  int sts;
+  long sts;
   sts = get_uptime();
   return Py_BuildValue("l", sts);
 }
