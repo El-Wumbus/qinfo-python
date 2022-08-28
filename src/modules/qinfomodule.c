@@ -1,6 +1,7 @@
 #include <Python.h>
 #include "../../qinfo/src/unix.h"
 #include "../../qinfo/src/config.h"
+#include "../../qinfo/src/logo.h"
 
 typedef PyObject pyob;
 
@@ -101,7 +102,6 @@ static pyob *qinfo_hostname(pyob *self)
   free(sts);
   return retval;
 }
-
 
 static pyob *qinfo_parse_config(pyob *self, pyob *args)
 {
@@ -273,6 +273,52 @@ static pyob *qinfo_shell(pyob *self)
   return retval;
 }
 
+static pyob *qinfo_logo(pyob *self)
+{
+  char *os_name;
+  char *logo;
+  if ((os_name = get_operating_system_name_bedrock()) == NULL)
+  {
+    os_name = get_operating_system_name();
+  }
+  if (strcmp(os_name, "Arch Linux") == 0)
+  {
+    logo = logo_arch;
+  }
+  else if (strstr(os_name, "Alpine Linux") != NULL)
+  {
+    logo = alpine_logo;
+  }
+  else if (strstr(os_name, "Arco Linux") != NULL)
+  {
+    logo = arcolinux_logo;
+  }
+  else if (strstr(os_name, "Aritx Linux") != NULL)
+  {
+    logo = artix_logo;
+  }
+  else if (strstr(os_name, "Bedrock Linux") != NULL)
+  {
+    logo = bedrock_logo;
+  }
+  else if (strstr(os_name, "Gentoo") != NULL)
+  {
+    logo = gentoo_logo;
+  }
+  else if (strstr(os_name, "Ubuntu") != NULL)
+  {
+    logo = ubuntu_logo;
+  }
+  else
+  {
+    logo = generic_logo;
+  }
+  free(os_name);
+
+  pyob *retval = Py_BuildValue("s", logo);
+  return retval;
+}
+
 static PyMethodDef qinfof[] = {
     {"version", (PyCFunction)version, METH_NOARGS, "Returns the version of qinfo being used."},
     {"core_count", qinfo_get_core_count, METH_NOARGS, "Returns the core count."},
@@ -290,6 +336,7 @@ static PyMethodDef qinfof[] = {
     {"packages", qinfo_get_packages, METH_NOARGS, "Returns a dict of the number of packages for each supported package manager."},
     {"shell", qinfo_shell, METH_NOARGS, "Returns a string containing the shell (or if none found, the calling process)."},
     {"hostname", qinfo_hostname, METH_NOARGS, "Return the hostname of the system as a string."},
+    {"logo", qinfo_logo, METH_NOARGS, "Return a string of the logo representing the distro."},
     {NULL, NULL, 0, NULL}
     };
 
