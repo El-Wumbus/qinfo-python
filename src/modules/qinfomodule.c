@@ -113,10 +113,7 @@ static pyob *qinfo_parse_config(pyob *self, pyob *args)
     return NULL;
   }
 
-  if (parse_config(&config, config_location, silent) != 0)
-  {
-    return NULL;
-  }
+  parse_config(&config, config_location, silent);
   pyob *display_cpu = Py_BuildValue("B", config.DISPLAY_CPU_INFO);
   pyob *display_etc = Py_BuildValue("B", config.DISPLAY_ETC_CPU_INFO);
   pyob *display_mem = Py_BuildValue("B", config.DISPLAY_MEMORY_INFO);
