@@ -171,6 +171,31 @@ static pyob *qinfo_get_rootfs_fsage(pyob *self)
   return dict;
 }
 
+static pyob *qinfo_df(pyob *self, pyob*args)
+{
+  char* mount_point;
+
+  if (!PyArg_ParseTuple(args, "s", &mount_point))
+  {
+    return NULL;
+  }
+
+
+  struct statvfs stat = df(mount_point);
+  pyob *dict = PyDict_New();
+  PyDict_SetItemString(dict, "blocks", Py_BuildValue("i", stat.f_blocks));
+  PyDict_SetItemString(dict, "bfree", Py_BuildValue("i", stat.f_bfree));
+  PyDict_SetItemString(dict, "bavail", Py_BuildValue("i", stat.f_bavail));
+  PyDict_SetItemString(dict, "files", Py_BuildValue("i", stat.f_files));
+  PyDict_SetItemString(dict, "ffree", Py_BuildValue("i", stat.f_ffree));
+  PyDict_SetItemString(dict, "favail", Py_BuildValue("i", stat.f_favail));
+  PyDict_SetItemString(dict, "fsid", Py_BuildValue("i", stat.f_fsid));
+  PyDict_SetItemString(dict, "flag", Py_BuildValue("i", stat.f_flag));
+  PyDict_SetItemString(dict, "namemax", Py_BuildValue("i", stat.f_namemax));
+
+  return dict;
+}
+
 static struct packages formatted_packages(packagecount pacman_packages,
                                           packagecount apt_packages,
                                           packagecount apk_packages,
@@ -334,6 +359,7 @@ static PyMethodDef qinfof[] = {
     {"shell", qinfo_shell, METH_NOARGS, "Returns a string containing the shell (or if none found, the calling process)."},
     {"hostname", qinfo_hostname, METH_NOARGS, "Return the hostname of the system as a string."},
     {"logo", qinfo_logo, METH_NOARGS, "Return a string of the logo representing the distro."},
+    {"statvfs", qinfo_df, METH_VARARGS, "Returns a dict containing the values of the statvfs function."},
     {NULL, NULL, 0, NULL}
     };
 
